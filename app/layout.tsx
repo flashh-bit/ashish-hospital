@@ -17,7 +17,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ashishhospital.vercel.app"),
+  metadataBase: new URL("https://ashish-hospital-rudrapur.vercel.app"),
   title: {
     default: "Ashish Hospital — Quality Healthcare You Can Trust",
     template: "%s | Ashish Hospital",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     siteName: "Ashish Hospital",
     title: "Ashish Hospital — Quality Healthcare You Can Trust",
     description: "Compassionate, quality healthcare in Rudrapur, UP.",
-    url: "https://ashishhospital.vercel.app",
+    url: "https://ashish-hospital-rudrapur.vercel.app",
     images: [
       {
         url: "/og-image.jpg",
@@ -52,8 +52,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Ashish Hospital",
+    alternateName: "Ashish Hospital Rudrapur",
+    url: "https://ashish-hospital-rudrapur.vercel.app/",
+  };
+
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${sora.variable} ${inter.variable} font-body antialiased`}
       >
