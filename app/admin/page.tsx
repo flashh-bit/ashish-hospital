@@ -402,7 +402,7 @@ export default function AdminPage() {
                 >
                   <div className="relative h-40">
                     <Image
-                      src={`/gallery/${item.filename}`}
+                      src={item.filename}
                       alt={item.title || item.filename}
                       fill
                       className="object-cover"

@@ -1,36 +1,61 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import fs from "fs";
-import path from "path";
+import { list } from "@vercel/blob";
 
 export const metadata: Metadata = {
   title: "Gallery — Ashish Hospital",
   description:
     "View photos of Ashish Hospital's facilities, medical equipment, and patient care areas.",
   alternates: {
-    canonical: "https://ashishhospital.vercel.app/gallery",
+    canonical: "https://ashish-hospital-rudrapur.vercel.app/gallery",
   },
 };
 
 type GalleryItem = {
-  filename: string;
+  url: string;
+  title: string;
   uploadedAt: string;
 };
 
-function getGallery(): GalleryItem[] {
+async function getGallery(): Promise<GalleryItem[]> {
   try {
-    const filePath = path.join(process.cwd(), "data", "gallery.json");
-    const data = fs.readFileSync(filePath, "utf-8");
-    return JSON.parse(data);
-  } catch {
+    const { blobs } = await list({ prefix: "gallery/" });
+
+    const gallery = blobs.map((blob) => {
+      const basename = blob.pathname.replace("gallery/", "");
+      let title = "Gallery Image";
+
+      const dashIndex = basename.indexOf("-");
+      if (dashIndex !== -1) {
+        const withoutTimestamp = basename.substring(dashIndex + 1);
+        title = withoutTimestamp.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
+      }
+
+      return {
+        url: blob.url,
+        title: title,
+        uploadedAt: blob.uploadedAt.toISOString(),
+      };
+    });
+
+    // Sort by uploadedAt descending
+    gallery.sort(
+      (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+    );
+
+    return gallery;
+  } catch (error) {
+    console.error("Failed to fetch gallery from Blob:", error);
     return [];
   }
 }
 
+// Ensure the page always fetches the latest images
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export default function GalleryPage() {
-  const gallery = getGallery();
+export default async function GalleryPage() {
+  const gallery = await getGallery();
 
   return (
     <>
@@ -53,8 +78,8 @@ export default function GalleryPage() {
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-[16px]">
               {gallery.map((item, i) => (
                 <a
-                  key={item.filename}
-                  href={`/gallery/${item.filename}`}
+                  key={item.url}
+                  href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block"
@@ -70,13 +95,16 @@ export default function GalleryPage() {
                   }}
                 >
                   <Image
-                    src={`/gallery/${item.filename}`}
-                    alt={`Hospital gallery photo ${i + 1}`}
+                    src={item.url}
+                    alt={item.title}
                     width={600}
                     height={400}
                     className="w-full object-cover"
                     style={{ transition: "transform 0.3s ease, filter 0.3s ease" }}
                   />
+                  <div className="p-3 bg-white border border-t-0 border-[#E8E8E8] rounded-b-[12px]">
+                    <p className="text-sm font-medium text-gray-800">{item.title}</p>
+                  </div>
                 </a>
               ))}
             </div>

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { put } from "@vercel/blob";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,23 +12,6 @@ export async function POST(req: NextRequest) {
         { success: false, error: "No files uploaded" },
         { status: 400 }
       );
-    }
-
-    const galleryDir = path.join(process.cwd(), "public", "gallery");
-    const galleryJsonPath = path.join(process.cwd(), "data", "gallery.json");
-
-    // Ensure gallery directory exists
-    if (!fs.existsSync(galleryDir)) {
-      fs.mkdirSync(galleryDir, { recursive: true });
-    }
-
-    // Read current gallery data
-    let gallery: { filename: string; title: string; uploadedAt: string }[] = [];
-    try {
-      const data = fs.readFileSync(galleryJsonPath, "utf-8");
-      gallery = JSON.parse(data);
-    } catch {
-      gallery = [];
     }
 
     const uploadedFiles: string[] = [];
@@ -49,23 +31,18 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
-      const filename = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const filePath = path.join(galleryDir, filename);
+      // Create a safe title for the filename
+      const safeTitle = title.trim().replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_");
+      const filename = `gallery/${Date.now()}-${safeTitle}.${ext}`;
 
-      fs.writeFileSync(filePath, buffer);
-
-      gallery.push({
-        filename,
-        title: title.trim() || "Gallery Image",
-        uploadedAt: new Date().toISOString(),
+      // Upload to Vercel Blob
+      const blob = await put(filename, file, {
+        access: "public",
+        addRandomSuffix: false,
       });
 
-      uploadedFiles.push(filename);
+      uploadedFiles.push(blob.url);
     }
-
-    // Write updated gallery data
-    fs.writeFileSync(galleryJsonPath, JSON.stringify(gallery, null, 2));
 
     return NextResponse.json({
       success: true,
