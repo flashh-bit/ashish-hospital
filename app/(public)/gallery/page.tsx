@@ -17,7 +17,10 @@ type GalleryItem = {
   uploadedAt: string;
 };
 
+import { unstable_noStore as noStore } from "next/cache";
+
 async function getGallery(): Promise<GalleryItem[]> {
+  noStore(); // Completely disable caching for this function
   try {
     const { blobs } = await list({ prefix: "gallery/" });
 
