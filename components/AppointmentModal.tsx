@@ -38,10 +38,7 @@ export default function AppointmentModal({ children }: { children: React.ReactNo
           </button>
         </div>
 
-        <div onClick={() => {
-          // If the form redirects/completes, we can optionally close the modal if we click something that bubbles up,
-          // but we'll let the user just click X for now or click outside.
-        }}>
+        <div>
           <AppointmentForm isModal={true} />
         </div>
       </div>
