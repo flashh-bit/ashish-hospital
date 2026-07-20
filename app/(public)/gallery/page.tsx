@@ -1,15 +1,7 @@
-import type { Metadata } from "next";
-import Image from "next/image";
-import { list } from "@vercel/blob";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Gallery — Ashish Hospital",
-  description:
-    "View photos of Ashish Hospital's facilities, medical equipment, and patient care areas.",
-  alternates: {
-    canonical: "https://ashish-hospital-rudrapur.vercel.app/gallery",
-  },
-};
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 type GalleryItem = {
   url: string;
@@ -17,48 +9,17 @@ type GalleryItem = {
   uploadedAt: string;
 };
 
-import { unstable_noStore as noStore } from "next/cache";
+export default function GalleryPage() {
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-async function getGallery(): Promise<GalleryItem[]> {
-  noStore(); // Completely disable caching for this function
-  try {
-    const { blobs } = await list({ prefix: "gallery/" });
-
-    const gallery = blobs.map((blob) => {
-      const basename = blob.pathname.replace("gallery/", "");
-      let title = "Gallery Image";
-
-      const dashIndex = basename.indexOf("-");
-      if (dashIndex !== -1) {
-        const withoutTimestamp = basename.substring(dashIndex + 1);
-        title = withoutTimestamp.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
-      }
-
-      return {
-        url: blob.url,
-        title: title,
-        uploadedAt: blob.uploadedAt.toISOString(),
-      };
-    });
-
-    // Sort by uploadedAt descending
-    gallery.sort(
-      (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-    );
-
-    return gallery;
-  } catch (error) {
-    console.error("Failed to fetch gallery from Blob:", error);
-    return [];
-  }
-}
-
-// Ensure the page always fetches the latest images
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-export default async function GalleryPage() {
-  const gallery = await getGallery();
+  useEffect(() => {
+    fetch("/api/gallery", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => setGallery(data))
+      .catch(() => setGallery([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <>
@@ -77,7 +38,11 @@ export default async function GalleryPage() {
       {/* Gallery Grid */}
       <section style={{ padding: "48px 80px 80px", background: "#FFFFFF" }}>
         <div className="mx-auto" style={{ maxWidth: "1280px" }}>
-          {gallery.length > 0 ? (
+          {loading ? (
+            <div className="text-center" style={{ padding: "80px 0" }}>
+              <p style={{ fontSize: "18px", color: "#888888" }}>Loading...</p>
+            </div>
+          ) : gallery.length > 0 ? (
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-[16px]">
               {gallery.map((item, i) => (
                 <a
