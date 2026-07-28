@@ -425,7 +425,7 @@ export default function Home() {
             <div data-anim="fade-up" data-stagger="2" style={{ height: "100%", minHeight: "clamp(180px, 45vw, 400px)" }}>
               <div className="bg-white rounded-2xl shadow-lg border border-[#E8E8E8] overflow-hidden" style={{ height: "100%", width: "100%" }}>
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3570.3526022680085!2d83.792411!3d26.508782!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3993d77381cfde31%3A0xb27a6a0ea30f6258!2sAshish%20hospital%20-%20Dr.%20Pujari!5e0!3m2!1sen!2sin!4v1777374190269!5m2!1sen!2sin"
+                  src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3572.2345942475704!2d83.603189!3d26.448166000000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjbCsDI2JzUzLjQiTiA4M8KwMzYnMTEuNSJF!5e0!3m2!1sen!2sin!4v1785224307346!5m2!1sen!2sin"
                   width="100%"
                   height="100%"
                   style={{ border: 0, minHeight: "clamp(180px, 45vw, 400px)" }}

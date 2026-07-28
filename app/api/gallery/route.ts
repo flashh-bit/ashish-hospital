@@ -1,30 +1,22 @@
 import { NextResponse } from "next/server";
-import { list } from "@vercel/blob";
 
 export const dynamic = "force-dynamic";
 
+// The gallery-index.json is a public blob file — no token needed to read it.
+// Its URL pattern: https://<store-id>.public.blob.vercel-storage.com/gallery-index.json
+const INDEX_URL = process.env.GALLERY_INDEX_URL || "";
+
 export async function GET() {
   try {
-    const { blobs } = await list({ prefix: "gallery/" });
-
-    const gallery = blobs.map((blob) => {
-      const basename = blob.pathname.replace("gallery/", "");
-      let title = "Gallery Image";
-      const dashIndex = basename.indexOf("-");
-      if (dashIndex !== -1) {
-        const withoutTimestamp = basename.substring(dashIndex + 1);
-        title = withoutTimestamp.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
-      }
-      return { url: blob.url, title, uploadedAt: blob.uploadedAt.toISOString() };
-    });
-
-    gallery.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
-
-    return NextResponse.json(gallery, {
-      headers: { "Cache-Control": "no-store" },
-    });
+    if (!INDEX_URL) {
+      return NextResponse.json([], { headers: { "Cache-Control": "no-store" } });
+    }
+    const res = await fetch(INDEX_URL, { cache: "no-store" });
+    if (!res.ok) return NextResponse.json([]);
+    const data = await res.json();
+    return NextResponse.json(data, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
-    console.error("Public gallery list error:", error);
-    return NextResponse.json([], { status: 200 });
+    console.error("Gallery index fetch error:", error);
+    return NextResponse.json([]);
   }
 }
