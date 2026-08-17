@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      let title = titles[i] || file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
+      const title = titles[i] || file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
 
       const ext = file.name.split(".").pop()?.toLowerCase();
       if (!ext || !["jpg", "jpeg", "png", "webp"].includes(ext)) continue;

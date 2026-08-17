@@ -17,6 +17,7 @@ export async function GET() {
       .max_results(500)
       .execute();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const gallery = result.resources.map((file: any) => {
       const basename = file.public_id.replace("ashish-hospital-gallery/", "");
       let title = "Gallery Image";
