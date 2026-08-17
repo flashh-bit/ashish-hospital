@@ -3,6 +3,7 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow, Pagination, Navigation, Autoplay } from "swiper/modules";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 // Import Swiper styles
 import "swiper/css";
@@ -10,9 +11,22 @@ import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 
-type GalleryItem = { filename: string; title: string; uploadedAt: string };
+type GalleryItem = { filename?: string; url?: string; title: string; uploadedAt: string };
 
-export default function GalleryCarousel({ gallery }: { gallery: GalleryItem[] }) {
+export default function GalleryCarousel({ gallery: initialGallery }: { gallery?: GalleryItem[] }) {
+  const [gallery, setGallery] = useState<GalleryItem[]>(initialGallery || []);
+
+  useEffect(() => {
+    fetch(`/api/gallery?t=${Date.now()}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.length > 0) {
+          setGallery(data);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   if (!gallery || gallery.length === 0) return null;
 
   return (
@@ -46,7 +60,7 @@ export default function GalleryCarousel({ gallery }: { gallery: GalleryItem[] })
             className="w-[70vw] sm:w-[400px] md:w-[600px] h-[300px] md:h-[450px] relative rounded-2xl overflow-hidden shadow-2xl transition-transform"
           >
             <Image
-              src={`/gallery/${item.filename}`}
+              src={item.url || `/gallery/${item.filename}`}
               alt={item.title || `Gallery Image ${index}`}
               fill
               className="object-cover"
