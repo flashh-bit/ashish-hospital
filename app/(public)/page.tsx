@@ -367,17 +367,7 @@ export default function Home() {
             </div>
           </div>
 
-          {gallery.length > 0 ? (
-            <GalleryCarousel gallery={gallery} />
-          ) : (
-            <div className="text-center" style={{ padding: "60px 0" }}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="mx-auto" style={{ marginBottom: "16px" }}>
-                <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#888888" strokeWidth="1.5" strokeLinecap="round" />
-                <circle cx="12" cy="13" r="3" stroke="#888888" strokeWidth="1.5" />
-              </svg>
-              <p style={{ fontSize: "18px", color: "#888888" }}>Gallery coming soon</p>
-            </div>
-          )}
+          <GalleryCarousel />
         </div>
       </section>
 
