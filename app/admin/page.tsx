@@ -35,8 +35,8 @@ export default function AdminPage() {
   const fetchData = useCallback(async () => {
     try {
       const [galRes, revRes] = await Promise.all([
-        fetch("/api/admin/gallery-list"),
-        fetch("/api/admin/reviews-list"),
+        fetch(`/api/admin/gallery-list?t=${Date.now()}`, { cache: "no-store" }),
+        fetch(`/api/admin/reviews-list?t=${Date.now()}`, { cache: "no-store" }),
       ]);
 
       if (galRes.status === 401 || revRes.status === 401) {
