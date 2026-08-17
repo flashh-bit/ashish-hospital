@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import ImageCropperModal from "@/components/ImageCropperModal";
 
-type GalleryItem = { filename: string; title: string; uploadedAt: string };
+type GalleryItem = { filename: string; url?: string; title: string; uploadedAt: string };
 type ReviewItem = {
   id: string;
   name: string;
@@ -402,7 +402,7 @@ export default function AdminPage() {
                 >
                   <div className="relative h-40">
                     <Image
-                      src={item.filename}
+                      src={item.url || item.filename}
                       alt={item.title || item.filename}
                       fill
                       className="object-cover"

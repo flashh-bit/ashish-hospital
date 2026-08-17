@@ -1,38 +1,41 @@
 import { NextResponse } from "next/server";
-import { list } from "@vercel/blob";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const { blobs } = await list({ prefix: "gallery/" });
+    const result = await cloudinary.search
+      .expression("folder:ashish-hospital-gallery")
+      .sort_by("created_at", "desc")
+      .max_results(500)
+      .execute();
 
-    const gallery = blobs.map((blob) => {
-      // Extract title from filename: gallery/1681234567-Reception_Area.jpg
-      const basename = blob.pathname.replace("gallery/", "");
+    const gallery = result.resources.map((file: any) => {
+      const basename = file.public_id.replace("ashish-hospital-gallery/", "");
       let title = "Gallery Image";
-      
       const dashIndex = basename.indexOf("-");
       if (dashIndex !== -1) {
-        const withoutTimestamp = basename.substring(dashIndex + 1);
-        title = withoutTimestamp.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
+        title = basename.substring(dashIndex + 1).replace(/_/g, " ");
       }
 
       return {
-        filename: blob.url, // Using full URL instead of local filename
+        filename: file.public_id, // We use public_id here so the admin panel can delete it
+        url: file.secure_url,
         title: title,
-        uploadedAt: blob.uploadedAt.toISOString(),
+        uploadedAt: file.created_at,
       };
     });
 
-    // Sort by uploadedAt descending (newest first)
-    gallery.sort(
-      (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-    );
-
     return NextResponse.json(gallery);
   } catch (error) {
-    console.error("Gallery list error:", error);
+    console.error("Cloudinary admin gallery list error:", error);
     return NextResponse.json([]);
   }
 }

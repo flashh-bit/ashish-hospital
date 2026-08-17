@@ -1,36 +1,42 @@
 import { NextResponse } from "next/server";
-import { list } from "@vercel/blob";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const { blobs } = await list({ prefix: "gallery/" });
+    const result = await cloudinary.search
+      .expression("folder:ashish-hospital-gallery")
+      .sort_by("created_at", "desc")
+      .max_results(500)
+      .execute();
 
-    const gallery = blobs
-      .filter((b) => b.pathname !== "gallery-index.json")
-      .map((blob) => {
-        const basename = blob.pathname.replace("gallery/", "");
-        let title = "Gallery Image";
-        const dashIndex = basename.indexOf("-");
-        if (dashIndex !== -1) {
-          const withoutTimestamp = basename.substring(dashIndex + 1);
-          title = withoutTimestamp.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
-        }
-        return {
-          url: blob.url,
-          title: title,
-          uploadedAt: blob.uploadedAt.toISOString(),
-        };
-      });
+    const gallery = result.resources.map((file: any) => {
+      // The public_id looks like: ashish-hospital-gallery/168923456-My_Image
+      const basename = file.public_id.replace("ashish-hospital-gallery/", "");
+      let title = "Gallery Image";
+      const dashIndex = basename.indexOf("-");
+      if (dashIndex !== -1) {
+        title = basename.substring(dashIndex + 1).replace(/_/g, " ");
+      }
 
-    gallery.sort(
-      (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-    );
+      return {
+        url: file.secure_url,
+        title: title,
+        uploadedAt: file.created_at,
+        public_id: file.public_id, // We'll need this for deletion
+      };
+    });
 
     return NextResponse.json(gallery, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
-    console.error("Gallery list fetch error:", error);
+    console.error("Cloudinary list fetch error:", error);
     return NextResponse.json([]);
   }
 }
