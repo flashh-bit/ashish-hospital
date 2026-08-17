@@ -14,7 +14,7 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/gallery", { cache: "no-store" })
+    fetch(`/api/gallery?t=${Date.now()}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => setGallery(data))
       .catch(() => setGallery([]))
