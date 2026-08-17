@@ -14,24 +14,10 @@ import ReviewCard from "@/components/ReviewCard";
 import AppointmentModal from "@/components/AppointmentModal";
 import dynamic from "next/dynamic";
 import reviewsData from "@/data/reviews.json";
-import fs from "fs";
-import path from "path";
-
+// removed getGallery
 const GalleryCarousel = dynamic(() => import("@/components/GalleryCarousel"), {
   ssr: false,
 });
-
-// Gallery data loader
-type GalleryItem = { filename: string; title: string; uploadedAt: string };
-function getGallery(): GalleryItem[] {
-  try {
-    const filePath = path.join(process.cwd(), "data", "gallery.json");
-    const data = fs.readFileSync(filePath, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
 
 // Department icon SVGs
 function DeptIcon({ id }: { id: string }) {
@@ -87,7 +73,6 @@ function DeptIcon({ id }: { id: string }) {
 }
 
 export default function Home() {
-  const gallery = getGallery();
 
   const heroStats = [
     { number: "20+", label: "Years of Experience" },
